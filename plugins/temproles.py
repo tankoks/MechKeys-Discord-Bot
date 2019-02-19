@@ -8,22 +8,22 @@ import re
 import CONFIG
 
 class Verification(pluginShell):
+    def __init__(self, ClientInstance):
+        pluginShell.__init__(self, ClientInstance)
+
     @userCommand
     async def flashsales(self, message):
-        if (
-        ("I understand that this channel"
-        " will have everyone pings"
-        " and that abusing them can result in a ban."
-        " I also understand that this channel is a privilege."
-        " I am entitled to everything."
-        " Sony is a piece of shit."
-        " I deserve everything.") in message.content.lower()
-        or message.content.lower().startswith("!flashsale")):
-            await addTempRole(message, message.author, CONFIG.TEMPROLEIDS["flashsales"])
+        await self.addTempRole(self, message, message.author, CONFIG.TEMPROLEIDS["flashsales"])
+
+
+    @userCommand
+    async def casting(self, message):
+        await self.addTempRole(self, message, message.author, CONFIG.TEMPROLEIDS["Casting"])
 
 
     #helper function to add temproles
-    async def addTempRole(message, member, role):
+    @staticmethod
+    async def addTempRole(self, message, member, role):
         for memberroles in message.author.roles:
             if memberroles.id == role:
                 roleAdd = discord.utils.get(message.server.roles,

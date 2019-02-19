@@ -12,8 +12,8 @@ class Sony(pluginShell):
 
     #TODO add exception handeling
     @userCommand
-    async def executeCode(self, message):
-        if message.author.id == "142750185380904960":
+    async def executecode(self, message):
+        if message.author.id == "1FIXME_USERID":
             env = {
                 'client': self.clientInstance,
                 'channel': message.channel,

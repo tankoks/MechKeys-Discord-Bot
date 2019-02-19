@@ -1,6 +1,7 @@
 from pluginFramework import pluginShell
 from attributes import userCommand
 from attributes import backgroundLoop
+from attributes import afterCheck
 import asyncio
 import discord
 import re
@@ -8,45 +9,54 @@ import re
 import CONFIG
 
 class Verification(pluginShell):
-    @userCommand
+    def __init__(self, ClientInstance):
+        pluginShell.__init__(self, ClientInstance)
+
+
+
+    @afterCheck
     async def verify(self, message):
         if message.channel.id == CONFIG.VERIFYCHAN:
-            if message.contents.lower = CONFIG.VERIFYPHRASE
+            if CONFIG.VERIFYPHRASE in message.content.lower():
                 roleAdd = discord.utils.get(message.server.roles,
                     id = CONFIG.VERIFYROLEID)
                 await self.clientInstance.add_roles(message.author, roleAdd)
             await self.clientInstance.delete_message(message)
 
     @userCommand
-    async def NA(self, message):
-        await addRegionRole(message, message.author, CONFIG.REGIONROLEID["NA"])
+    async def na(self, message):
+        await self.addRegionRole(self, message, message.author, CONFIG.REGIONROLEID["NA"])
     @userCommand
-    async def AUS(self, message):
-        await addRegionRole(message, message.author, CONFIG.REGIONROLEID["AUS"])
+    async def aus(self, message):
+        await self.addRegionRole(self, message, message.author, CONFIG.REGIONROLEID["AUS"])
     @userCommand
-    async def SEA(self, message):
-        await addRegionRole(message, message.author, CONFIG.REGIONROLEID["SEA"])
+    async def sea(self, message):
+        await self.addRegionRole(self, message, message.author, CONFIG.REGIONROLEID["SEA"])
     @userCommand
-    async def SA(self, message):
-        await addRegionRole(message, message.author, CONFIG.REGIONROLEID["SA"])
+    async def sa(self, message):
+        await self.addRegionRole(self, message, message.author, CONFIG.REGIONROLEID["SA"])
     @userCommand
-    async def AFRICA(self, message):
-        await addRegionRole(message, message.author, CONFIG.REGIONROLEID["AFRICA"])
+    async def africa(self, message):
+        await self.addRegionRole(self, message, message.author, CONFIG.REGIONROLEID["AFRICA"])
     @userCommand
-    async def ASIA(self, message):
-        await addRegionRole(message, message.author, CONFIG.REGIONROLEID["ASIA"])
+    async def asia(self, message):
+        await self.addRegionRole(self, message, message.author, CONFIG.REGIONROLEID["ASIA"])
     @userCommand
-    async def ME(self, message):
-        await addRegionRole(message, message.author, CONFIG.REGIONROLEID["ME"])
+    async def me(self, message):
+        await self.addRegionRole(self, message, message.author, CONFIG.REGIONROLEID["ME"])
+    @userCommand
+    async def eu(self, message):
+        await self.addRegionRole(self, message, message.author, CONFIG.REGIONROLEID["EU"])
 
 
     #helper function to add roles
-    async def addRegionRole(message, member, roleID):
+    @staticmethod
+    async def addRegionRole(self, message, member, roleID):
         if message.channel.id == CONFIG.REGIONROLECHAN:
             rolelist = []
             for memberroles in member.roles:
                 rolelist.append(memberroles.id)
-            for IDs in roleIDs:
+            for IDs in CONFIG.REGIONROLEID.values():
                 if IDs in rolelist:
                     await self.clientInstance.delete_message(message)
                     return
