@@ -10,7 +10,7 @@ import (
 
 	"github.com/andersfylling/disgord"
 	"github.com/andersfylling/disgord/std"
-	"github.com/andersfylling/snowflake/"
+	"github.com/andersfylling/snowflake"
 )
 
 func main() {
@@ -47,6 +47,10 @@ func main() {
 	purgeFilter, _ := std.NewMsgFilter(context.Background(), client)
 	purgeFilter.SetPrefix("!purge")
 	client.On(disgord.EvtMessageCreate, purgeFilter.NotByBot, purgeFilter.HasPrefix, purgeFilter.StripPrefix, purge)
+
+	tradeFilter, _ := std.NewMsgFilter(context.Background(), client)
+	tradeFilter.SetPrefix("!trade")
+	client.On(disgord.EvtMessageCreate, tradeFilter.NotByBot, tradeFilter.HasPrefix, tradeFilter.StripPrefix, trade)
 }
 
 func verify(session disgord.Session, evt *disgord.MessageCreate) {
@@ -147,31 +151,41 @@ func lifealert(session disgord.Session, evt *disgord.MessageCreate) {
 func purge(session disgord.Session, evt *disgord.MessageCreate) {
 	msg := evt.Message
 
-	numString := strings.Replace(msg.Content, " ", "", -1)
-	num, err := strconv.ParseUint(numString, 10, 32)
+	for _, n := range msg.Member.Roles {
+		if n == snowflake.NewSnowflake(387703313283416085) || n == snowflake.NewSnowflake(190330163743948800) {
+			numString := strings.Replace(msg.Content, " ", "", -1)
+			num, err := strconv.ParseUint(numString, 10, 32)
 
-	if err != nil {
-		return
+			if err != nil {
+				return
+			}
+
+			uintnum := uint(num)
+
+			messages, err := session.GetMessages(context.Background(), msg.ChannelID, &disgord.GetMessagesParams{
+				Before: msg.ID,
+				Limit:  uintnum,
+			})
+
+			if err != nil {
+				return
+			}
+
+			deletemessages := []snowflake.Snowflake{}
+
+			for _, message := range messages {
+				deletemessages = append(deletemessages, message.ID)
+			}
+
+			session.DeleteMessages(context.Background(), msg.ChannelID, &disgord.DeleteMessagesParams{Messages: deletemessages})
+			session.DeleteMessage(context.Background(), msg.ChannelID, msg.ID)
+			msg.Reply(context.Background(), session, "👀")
+			break
+		}
 	}
+}
 
-	uintnum := uint(num)
-
-	messages, err := session.GetMessages(context.Background(), msg.ChannelID, &disgord.GetMessagesParams{
-		Before: msg.ID,
-		Limit:  uintnum,
-	})
-
-	if err != nil {
-		return
-	}
-
-	deletemessages := []snowflake.Snowflake{}
-
-	for _, message := range messages {
-		deletemessages = append(deletemessages, message.ID)
-	}
-
-	session.DeleteMessages(context.Background(), msg.ChannelID, &disgord.DeleteMessagesParams{Messages: deletemessages})
-	session.DeleteMessage(context.Background(), msg.ChannelID, msg.ID)
-	msg.Reply(context.Background(), session, "👀")
+func trade(session disgord.Session, evt *disgord.MessageCreate) {
+	msg := evt.Message
+	msg.Reply(context.Background(), session, `This is a reminder that this discord SHOULD NOT be used as a trading platform. We have no way of preventing scammers from utilizing this service and we have no way to verify trades or crosscheck the scammer list. Exercise caution if you do trade with other members of the discord, and remember to always use Paypal "Goods and Services" or equivalent. Trade with users here at your own risk.`)
 }
